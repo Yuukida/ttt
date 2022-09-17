@@ -17,17 +17,23 @@ app.get('/', function(req, res) {
 
 app.get('/ttt', function(req, res) {
     console.log('ttt')
-    console.log(req);
     if(req.query.name){
+        console.log('name input')
         res.statusCode = 200;
         res.setHeader('X-CSE356', '6306cc6d58d8bb3ef7f6b85b');
         res.setHeader('Content-Type', 'text/html')
-        res.render('front', {name: req.query.name, date: new Date().toISOString().split('T')[0], hasName: true})
+        res.send('Hello ' + req.query.name + ", " +  new Date().toISOString().split('T')[0])
     }else{
+        console.log('init')
         res.statusCode = 200;
         res.setHeader('X-CSE356', '6306cc6d58d8bb3ef7f6b85b');
+        res.setHeader('Content-Type', 'text/html')
         res.render("front", {hasName: false});
     }
+    
+})
+
+app.post('/ttt/play', (req, res) => {
     
 })
 
