@@ -1,7 +1,38 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 h2 {
     color: #B8AFE6
 }
 
 input {
     display: flex
+}
+
+body {
+    position: relative;
+}
+
+.board {
+    display: grid;
+    justify-content: center;
+    color: black;
+    grid-template-columns: 33% 33% 33%;
+    grid-template-rows: 33% 33% 33%;
+    width: 300px;
+    height: 300px;
+}
+
+.square {
+    display: flex;
+    width: 100px;
+    height: 100px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid black;
+    float:left;
+    font-size: 50px;
 }
