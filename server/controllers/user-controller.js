@@ -16,7 +16,7 @@ sendEmail = async (email, key, req, res) => {
     })
 
     host=req.get('host');
-    let link = "http://" + host + "/verify?email=" + body.email +"&key=" + key
+    let link = "http://" + host + "/verify?email=" + email +"&key=" + key
     transporter.sendMail({
         to: email,
         subject: "verify email",
@@ -31,9 +31,9 @@ sendEmail = async (email, key, req, res) => {
 }
 
 registerUser = async (req, res) => {
-    body = req.body;
+    const {username, password, email} = req.body;
     res.setHeader('X-CSE356', '6306cc6d58d8bb3ef7f6b85b');
-    if (!body.username || !body.password || !body.email) {
+    if (!username || !password || !email) {
         return res
             .status(400)
             .send(JSON.stringify({
@@ -42,8 +42,8 @@ registerUser = async (req, res) => {
             }))
     }
 
-    const existingEmail = await User.findOne({ email: body.email });
-    const existingUser = await User.findOne({ username: body.username });
+    const existingEmail = await User.findOne({ email: email });
+    const existingUser = await User.findOne({ username: username });
     if (existingEmail || existingUser) {
         return res
             .status(400)
@@ -55,27 +55,27 @@ registerUser = async (req, res) => {
 
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
-    const passwordHash = await bcrypt.hash(body.password, salt);
+    const passwordHash = await bcrypt.hash(password, salt);
     
     const genKey = crypto.generateKeySync('hmac', { length: 128 });
     const key = genKey.export().toString('hex')
 
     const newUser = new User({
-        username: body.username,
-        email: body.email,
+        username: username,
+        email: email,
         password: passwordHash,
         verified: false,
         key: key
     })
     const savedUser = await newUser.save();
-    sendEmail(body.email, key, req, res)
+    sendEmail(email, key, req, res)
 }
 
 
 verifyUser = async (req, res) => {
     res.setHeader('X-CSE356', '6306cc6d58d8bb3ef7f6b85b');
-    body = req.query
-    if(!body.email){
+    const {email, key} = req.query
+    if(!email){
         return res
             .status(400)
             .send(JSON.stringify({
@@ -84,9 +84,9 @@ verifyUser = async (req, res) => {
             }))
     }
 
-    const user = await User.findOne({ email: body.email });
+    const user = await User.findOne({ email: email });
 
-    if (body.key !== user.key){
+    if (key !== user.key){
         return res
             .status(400)
             .send(JSON.stringify({
@@ -113,9 +113,9 @@ verifyUser = async (req, res) => {
 
 login = async (req, res) => {
     res.setHeader('X-CSE356', '6306cc6d58d8bb3ef7f6b85b');
-    body = req.body
+    const {username, password} = req.body
 
-    if (!body.username || ! body.password){
+    if (!username || !password){
         return res
                 .status(400)
                 .send(JSON.stringify({
@@ -124,7 +124,7 @@ login = async (req, res) => {
                 }))
     }
 
-    const user = await User.findOne({username: "d"})
+    const user = await User.findOne({username:username})
     if(!user){
         return res
                 .status(400)
@@ -134,7 +134,7 @@ login = async (req, res) => {
                 }))
     }
 
-    const match = await bcrypt.compare(body.password, user.password);
+    const match = await bcrypt.compare(password, user.password);
     if(!match) {
         return res
             .status(400)
@@ -144,7 +144,7 @@ login = async (req, res) => {
             }))
     }
     console.log(req.session)
-    req.session.user = body.username
+    req.session.user = username
     return res
         .status(200)
         .send(JSON.stringify({

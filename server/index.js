@@ -1,10 +1,9 @@
-var express = require('express');
-var app = express();
-var http = require('http');
-var server = http.createServer(app);
+const express = require('express');
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
 const session = require('express-session')
 const mongoDBSession = require('connect-mongodb-session')(session)
-var bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
 
 const dotenv = require('dotenv')
@@ -18,8 +17,8 @@ const store = new mongoDBSession({
     collection: 'sessions'
 })
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
+app.use(express.urlencoded({extended: true}));
+app.use(express.json());
 
 app.use(express.static('public'))
 app.set('view engine', 'ejs');
