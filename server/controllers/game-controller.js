@@ -11,16 +11,14 @@ function checkWin(player){
     ]
 
     win = false;
-    console.log(player)
     for (const combo of WINNINGCOMBO) {
-        console.log(board[combo[0]], board[combo[1]], board[combo[2]], player)
-        console.log('=============')
+        //console.log(board[combo[0]], board[combo[1]], board[combo[2]], player)
+        //console.log('=============')
         if ( board[combo[0]] === board[combo[1]] && board[combo[2]] === board[combo[0]] && board[combo[0]] === player ){
             win = true;
             break;
         }
     }
-    console.log(win)
     return win;
 }
 
@@ -59,6 +57,8 @@ tttPage = (req, res) => {
 }
 
 playGame = (req, res) => {
+    const {grid} = req.body.grid;
+    console.log(req.body)
     board = req.body.grid;
 
     // check X winner
