@@ -5,7 +5,6 @@ const GameSchema = new Schema (
     {
         grid: {type: Array, require: true},
         winner: {type: String, require: true},
-        gameId: {type: String, required: true}
     },
     { timestamps: true }
 )
