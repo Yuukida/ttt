@@ -4,7 +4,8 @@ const Schema = mongoose.Schema
 const GameSchema = new Schema (
     {
         grid: {type: Array, require: true},
-        winner: {type: String, require: true},
+        winner: {type: String, required: true},
+        owner: {type: String, required: true}
     },
     { timestamps: true }
 )

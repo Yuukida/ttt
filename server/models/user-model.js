@@ -8,6 +8,7 @@ const UserSchema = new Schema (
         password: { type: String, required: true },
         verified: {type: Boolean, required: true},
         key: {type: String, required: true},
+        currentGame: {type: ObjectId, required: true}
     },
     { timestamps: true }
 )
