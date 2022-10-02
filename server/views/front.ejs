@@ -30,8 +30,23 @@
             <input type="submit" value="Submit">
         </form>
     <% } %>
+    <br>
     <form action="/logout" method="post"">
         <input type="submit" value="logout">
+    </form>
+    <br>
+    <form action="/listgames" method="post"">
+        <input type="submit" value="listgames">
+    </form>
+    <br>
+    <form action="/getgame" method="post"">
+        <label for="id">id:</label>
+            <input type="text" id="id" name="id"><br><br>
+        <input type="submit" value="getgame">
+    </form>
+    <br>
+    <form action="/getscore" method="post"">
+        <input type="submit" value="getscore">
     </form>
 </body>
 </html>

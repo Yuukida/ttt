@@ -5,18 +5,23 @@ console.log(squares)
 var board = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
 
 squares.forEach(square => {
-    square.addEventListener('click', handleClick, { once: true})
+    square.addEventListener('click', handleClick)
 });
 
 
 function handleClick(e) {
     const square = e.target;
+    if (square.innerHTML !== "" && square.innerHTML !== " "){
+        sendToServer(null)
+        return
+    }
     square.innerHTML += 'X';
     board[parseInt(square.id)] = 'X';
-    sendToServer();
+    sendToServer(parseInt(square.id));
 }
 
-function sendToServer() {
+function sendToServer(move) {
+    console.log(move)
     fetch('/ttt/play', {
         method: "post",
         headers: {
@@ -24,23 +29,26 @@ function sendToServer() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            grid: board
+            move: move
         })
     })
     .then((response) => response.json())
     .then((data) => {
-        
+        let winner = document.getElementById('winner')
+        winner.innerHTML = 'Winner: '
         if (data.winner != ' '){
             let winner = document.getElementById('winner')
             winner.innerHTML = 'Winner: ' + data.winner
+            squares.forEach(square => {
+                square.innerHTML = ""
+            })
             return
         }
 
         board = data.grid
+        console.log(board)
         for (let x=0; x<9; x++) {
-            if(squares[x].innerHTML == '' && board[x] != ' '){
-                squares[x].innerHTML += board[x]
-            }
+            squares[x].innerHTML = board[x]
         }
     });
 }

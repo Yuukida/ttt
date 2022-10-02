@@ -9,7 +9,7 @@ const auth = (req, res, next) => {
         next()
     }else{
         return res
-            .status(401)
+            .status(200)
             .send(JSON.stringify({
                 status: 'ERROR',
                 errorMessage: 'unauthorized'
@@ -20,6 +20,10 @@ const auth = (req, res, next) => {
 router.get('/', GameController.basePage)
 router.get('/ttt', auth, GameController.tttPage)
 router.post('/ttt/play', auth, GameController.playGame)
+router.post('/listgames', auth, GameController.listgames)
+router.post('/getgame', auth, GameController.getgame)
+router.post('/getscore', auth, GameController.getscore)
+
 
 router.get('/adduser', UserController.registerPage)
 router.post('/adduser', UserController.registerUser)

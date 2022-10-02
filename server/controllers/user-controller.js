@@ -1,27 +1,17 @@
 const User = require('../models/user-model')
 const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
-const nodemailer = require('nodemailer')
-var xoauth2 = require('xoauth2');
+const exec = require('child_process').spawn
+
 
 sendEmail = async (email, key, req, res) => {
-    let testAccount = await nodemailer.createTestAccount();
-
-    let transporter = nodemailer.createTransport({
-        service: 'Gmail',
-        auth: {
-            user: 'weng1043282095@gmail.com', // generated ethereal user
-            pass: 'xkrmqnvpiwrohsxh', // generated ethereal password
-        },
-    })
-
     host=req.get('host');
-    let link = "http://" + host + "/verify?email=" + email +"&key=" + key
-    transporter.sendMail({
-        to: email,
-        subject: "verify email",
-        text: link
-    })
+    let link = "http://" + host + "/verify?email=" + encodeURIComponent(email) + "&key=" + key
+    console.log(link)
+    let commands = ['-c', "echo " + '\"' + link + "\"" + " | mail --encoding=quoted-printable -s \"verify\" " + email] 
+    console.log(commands)
+    let child = exec('sh', commands)
+
     console.log('email sent')
     return res
         .status(200)
@@ -34,8 +24,9 @@ registerUser = async (req, res) => {
     const {username, password, email} = req.body;
     res.setHeader('X-CSE356', '6306cc6d58d8bb3ef7f6b85b');
     if (!username || !password || !email) {
+        console.log('invalid fields')
         return res
-            .status(400)
+            .status(200)
             .send(JSON.stringify({
                 status: 'ERROR',
                 errorMessage: 'invalid fields'
@@ -45,8 +36,9 @@ registerUser = async (req, res) => {
     const existingEmail = await User.findOne({ email: email });
     const existingUser = await User.findOne({ username: username });
     if (existingEmail || existingUser) {
+        console.log('exist user')
         return res
-            .status(400)
+            .status(200)
             .send(JSON.stringify({
                 status: 'ERROR',
                 errorMessage: 'user exists'
@@ -65,9 +57,12 @@ registerUser = async (req, res) => {
         email: email,
         password: passwordHash,
         verified: false,
-        key: key
+        key: key,
+        currentGame: null,
+        hasGame: false
     })
     const savedUser = await newUser.save();
+    console.log('send email')
     sendEmail(email, key, req, res)
 }
 
@@ -77,37 +72,30 @@ verifyUser = async (req, res) => {
     const {email, key} = req.query
     if(!email){
         return res
-            .status(400)
+            .status(200)
             .send(JSON.stringify({
                 status: 'ERROR',
                 errorMessage: 'invalid email or user'
             }))
     }
-
+    
     const user = await User.findOne({ email: email });
 
     if (key !== user.key){
+        console.log('not same key')
         return res
-            .status(400)
+            .status(200)
             .send(JSON.stringify({
                 status: 'ERROR'
             }))
     }
     user.verified = true
-    user.save()
-        .then(() => {
-            return res
-                .status(200)
-                .send(JSON.stringify({
-                    status: 'OK'
-                }))
-        }).catch(error => {
-            return res
-                .status(400)
-                .send(JSON.stringify({
-                    status: 'ERROR',
-                    errorMessage: error
-                }))
+    await user.save()
+    console.log('wait')
+    return res
+        .status(200)
+        .json({
+            status: 'OK'
         })
 }
 
@@ -117,7 +105,7 @@ login = async (req, res) => {
 
     if (!username || !password){
         return res
-                .status(400)
+                .status(200)
                 .send(JSON.stringify({
                     status: 'ERROR',
                     errorMessage: 'invalid username or password'
@@ -127,17 +115,26 @@ login = async (req, res) => {
     const user = await User.findOne({username:username})
     if(!user){
         return res
-                .status(400)
+                .status(200)
                 .send(JSON.stringify({
                     status: 'ERROR',
                     errorMessage: 'unable to find user'
                 }))
     }
 
+    if(!user.verified){
+        return res
+                .status(200)
+                .send(JSON.stringify({
+                    status: 'ERROR',
+                    errorMessage: 'unverified'
+                }))
+    }
+
     const match = await bcrypt.compare(password, user.password);
     if(!match) {
         return res
-            .status(400)
+            .status(200)
             .send(JSON.stringify({
                 status: 'ERROR',
                 errorMessage: 'incorrect password'
